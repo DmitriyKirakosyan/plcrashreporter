@@ -5,14 +5,14 @@ pr:
 - master
 
 pool:
-  vmImage: macOS-11
+  vmImage: macOS-12
 
 variables:
   Configuration: Release
   SDK:
 
-  # Xcode 12.4 version is the last one that has compatible bitcode with Xcode 12.0 (minimal supported).
-  XCODE_PATH: '/Applications/Xcode_12.4.app/Contents/Developer'
+  # Xcode 13.2.1 version is the last one that has compatible bitcode with Xcode 13.0 (minimal supported).
+  XCODE_PATH: '/Applications/Xcode_13.2.1.app/Contents/Developer'
 
 jobs:
 - job:
@@ -43,25 +43,13 @@ jobs:
     displayName: 'Prepare macOS Framework and Tools'
     workingDirectory: '$(Build.BinariesDirectory)'
 
-  - template: combine-binaries-template.yml
-    parameters:
-      xcframeworkName: 'CrashReporter.xcframework'
-      outputPath: 'CrashReporter.xcframework'
-      macosFrameworkPath: 'Release-macosx/CrashReporter.framework'
-
-  - template: combine-binaries-template.yml
-    parameters:
-      xcframeworkName: 'CrashReporter-static.xcframework'
-      outputPath: 'PLCrashReporterStatic/CrashReporter.xcframework'
-      macosFrameworkPath: 'Release-macosx-static/CrashReporter.framework'
-
   - bash: |
       VERSION="$(cd $BUILD_SOURCESDIRECTORY && agvtool vers -terse)"
       [[ $BUILD_SOURCEBRANCH != 'refs/heads/master' ]] && VERSION="$VERSION+$(cd $BUILD_SOURCESDIRECTORY && git rev-parse --short $BUILD_SOURCEVERSION)"
       "$BUILD_SOURCESDIRECTORY/Scripts/create-archive.sh" "PLCrashReporter-$VERSION" "iOS Framework" "tvOS Framework" "Mac OS X Framework" "Tools"
       "$BUILD_SOURCESDIRECTORY/Scripts/create-archive.sh" "PLCrashReporter-Static-$VERSION" Static/* "Tools"
       "$BUILD_SOURCESDIRECTORY/Scripts/create-archive.sh" "PLCrashReporter-XCFramework-$VERSION" "CrashReporter.xcframework" "Tools"
-      "$BUILD_SOURCESDIRECTORY/Scripts/create-archive.sh" "PLCrashReporter-Static-$VERSION.xcframework" "PLCrashReporterStatic/CrashReporter.xcframework" "Tools"
+      "$BUILD_SOURCESDIRECTORY/Scripts/create-archive.sh" "PLCrashReporter-Static-$VERSION.xcframework" "XCFrameworkStatic/CrashReporter.xcframework" "Tools"
     displayName: 'Create Archives'
     workingDirectory: '$(Build.BinariesDirectory)/Release'
 
